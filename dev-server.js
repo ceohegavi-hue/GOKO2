@@ -42,7 +42,10 @@ createServer(async (req, res) => {
     const { pathname } = new URL(req.url, "http://localhost");
     if (pathname.startsWith("/api/")) return await handleApi(req, res, pathname);
 
-    const safe = normalize(decodeURIComponent(pathname)).replace(/^(\.\.[/\\])+/, "");
+    const aliased = decodeURIComponent(pathname)
+      .replace(/^\/images\/(?:perfis|f2\/reviews)\/([^/]+)$/, "/images/speed-$1")
+      .replace(/^\/__l5e\/assets-v1\/[^/]+\/([^/]+)$/, "/images/$1");
+    const safe = normalize(aliased).replace(/^(\.\.[/\\])+/, "");
     const candidates = safe.endsWith("/")
       ? [join(root, safe, "index.html")]
       : [join(root, safe), join(root, `${safe}.html`)];
