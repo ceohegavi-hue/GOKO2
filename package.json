@@ -2,9 +2,10 @@
   "name": "goko2",
   "private": true,
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "serve . -l 3000 --no-clipboard",
-    "start": "serve . -l 3000 --no-clipboard"
+    "dev": "node --env-file-if-exists=.env.development.local dev-server.js",
+    "start": "node dev-server.js"
   },
   "devDependencies": {
     "serve": "^14.2.4"
