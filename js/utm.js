@@ -118,12 +118,11 @@
   };
 })();
 
-/* Front do funil (/, /site, /pagamento, /oferta): mantem os UTMs do anuncio
+/* Todas as paginas do funil (front, oferta, upsells e obrigado): mantem os UTMs do anuncio
    do Facebook visiveis na URL e em todos os links internos, para que o script
-   da UTMify e a gateway recebam a mesma atribuicao em cada etapa. Upsells e
-   obrigado ficam de fora. */
+   da UTMify e a gateway recebam a mesma atribuicao em cada etapa. */
 (function(){
-  var FRONT = /^\/(index(\.html)?|site(\.html)?|pagamento(\.html)?|oferta(\.html)?)?$/;
+  var FRONT = /^\/(index(\.html)?|site(\.html)?|pagamento(\.html)?|oferta(\.html)?|obrigado(\.html)?|upsell[1-4](\.html)?)?$/;
   function isFront(path){ return FRONT.test(path || '/'); }
   try{
     if(window.top === window && isFront(location.pathname) && !/[?&]utm_source=/.test(location.search)){
