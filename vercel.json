@@ -3,5 +3,10 @@
   "framework": null,
   "buildCommand": "",
   "outputDirectory": ".",
-  "cleanUrls": false
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/images/perfis/:file", "destination": "/images/speed-:file" },
+    { "source": "/images/f2/reviews/:file", "destination": "/images/speed-:file" },
+    { "source": "/__l5e/assets-v1/:id/:file", "destination": "/images/:file" }
+  ]
 }

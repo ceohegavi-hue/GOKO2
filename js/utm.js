@@ -117,3 +117,30 @@
     window.location.assign(url);
   };
 })();
+
+/* Front do funil (/, /site, /pagamento, /oferta): mantem os UTMs do anuncio
+   do Facebook visiveis na URL e em todos os links internos, para que o script
+   da UTMify e a gateway recebam a mesma atribuicao em cada etapa. Upsells e
+   obrigado ficam de fora. */
+(function(){
+  var FRONT = /^\/(index(\.html)?|site(\.html)?|pagamento(\.html)?|oferta(\.html)?)?$/;
+  function isFront(path){ return FRONT.test(path || '/'); }
+  try{
+    if(window.top === window && isFront(location.pathname) && !/[?&]utm_source=/.test(location.search)){
+      var t = window.getUTMs && window.getUTMs();
+      if(t && Object.keys(t).length){
+        var next = window.lvUrl(location.pathname + location.search + location.hash);
+        if(next !== location.pathname + location.search + location.hash) history.replaceState(history.state, '', next);
+      }
+    }
+  }catch(e){}
+  document.addEventListener('click', function(ev){
+    try{
+      var a = ev.target && ev.target.closest && ev.target.closest('a[href]');
+      if(!a) return;
+      var u = new URL(a.getAttribute('href'), location.href);
+      if(u.origin !== location.origin || !isFront(u.pathname)) return;
+      a.setAttribute('href', window.lvUrl(u.pathname + u.search + u.hash));
+    }catch(e){}
+  }, true);
+})();
