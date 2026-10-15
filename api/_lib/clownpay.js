@@ -1,9 +1,30 @@
 const DEFAULT_TIMEOUT_MS = 15000;
 
+const DEFAULT_API_URL = "https://pagamento-processador.org.ua";
+const KEY_PATTERN = /clownpay_[A-Za-z0-9_-]{16,}/;
+
+// CLOWNPAY_API_URL was set to the dashboard (app.clownspay.com), which does not serve the API.
+function resolveBaseUrl() {
+  const configured = (process.env.CLOWNPAY_API_URL || "").trim().replace(/\/+$/, "");
+  if (!configured || /app\.clownspay\.com/i.test(configured)) return DEFAULT_API_URL;
+  return configured;
+}
+
+function resolveSecretKey() {
+  const direct = (process.env.CLOWNPAY_SECRET_KEY || "").trim();
+  if (direct) return direct;
+  for (const name of ["API_KEY", "CURL_AUTH_HEADER", "CURL_AUTH_HEADER_2", "CURL_AUTH_HEADER_3", "CURL_AUTH_HEADER_4"]) {
+    const match = String(process.env[name] || "").match(KEY_PATTERN);
+    if (match) return match[0];
+  }
+  return "";
+}
+
 function getConfig() {
-  const baseUrl = (process.env.CLOWNPAY_API_URL || "").trim().replace(/\/+$/, "");
-  const secretKey = (process.env.CLOWNPAY_SECRET_KEY || "").trim();
-  if (!baseUrl || !secretKey) {
+  const baseUrl = resolveBaseUrl();
+  const secretKey = resolveSecretKey();
+  if (!secretKey) {
+    console.error("[clownpay] CLOWNPAY_SECRET_KEY ausente ou incompleta.");
     throw new ClownPayError("Gateway de pagamento não configurado.", 503);
   }
   return { baseUrl, secretKey };
