@@ -50,6 +50,13 @@ Regras:
     return sendJson(res, 200, data);
   } catch (err) {
     console.error("[admin] generate failed:", err?.message);
+    const msg = String(err?.message || "");
+    if (/credit card|billing|payment|402|insufficient/i.test(msg)) {
+      return sendJson(res, 402, {
+        message:
+          "A geração por IA exige um cartão de crédito cadastrado na conta Vercel (AI Gateway). Adicione um cartão em vercel.com para liberar os créditos gratuitos.",
+      });
+    }
     return sendJson(res, 502, { message: "Falha ao gerar conteúdo. Tente novamente." });
   }
 }
