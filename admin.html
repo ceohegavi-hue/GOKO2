@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel — GOKO</title>
+<style>
+  :root{
+    --bg:#f4f5f7; --card:#ffffff; --line:#e5e7eb; --line2:#eef0f3;
+    --text:#111827; --muted:#6b7280; --accent:#7c3aed; --accent-2:#6d28d9;
+    --green:#059669; --red:#dc2626; --amber:#d97706;
+    --sidebar:#111827; --sidebar-text:#d1d5db; --sidebar-active:#ffffff;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit;cursor:pointer}
+  input,textarea,select{font-family:inherit;font-size:14px;color:var(--text)}
+  .hidden{display:none!important}
+
+  /* ---------- Login ---------- */
+  #login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#111827 0%,#1f2937 60%,#312e81 100%);z-index:100}
+  .login-card{background:#fff;border-radius:16px;padding:36px 32px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  .login-card .logo{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+  .login-card .logo span{color:var(--accent)}
+  .login-card p{color:var(--muted);font-size:13px;margin-bottom:22px}
+  .login-card label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
+  .login-card input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;outline:none;transition:border .15s}
+  .login-card input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+  .login-card .err{color:var(--red);font-size:12.5px;margin-top:10px;min-height:18px}
+  .login-card button{width:100%;margin-top:6px;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-weight:600;font-size:14px;transition:background .15s}
+  .login-card button:hover{background:var(--accent-2)}
+
+  /* ---------- Layout ---------- */
+  #app{display:flex;min-height:100vh}
+  .sidebar{width:232px;background:var(--sidebar);color:var(--sidebar-text);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh}
+  .sidebar .brand{padding:20px 20px 16px;font-size:17px;font-weight:800;color:#fff;letter-spacing:-.01em}
+  .sidebar .brand span{color:#a78bfa}
+  .sidebar nav{flex:1;padding:8px 12px;display:flex;flex-direction:column;gap:2px}
+  .sidebar nav button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;background:transparent;border:none;border-radius:9px;color:var(--sidebar-text);font-size:13.5px;font-weight:500;text-align:left;transition:background .12s,color .12s}
+  .sidebar nav button:hover{background:rgba(255,255,255,.06);color:#fff}
+  .sidebar nav button.active{background:var(--accent);color:#fff}
+  .sidebar nav button .ic{width:18px;height:18px;flex-shrink:0;opacity:.9}
+  .sidebar .foot{padding:14px 20px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:#6b7280}
+  .sidebar .foot button{background:none;border:none;color:#9ca3af;font-size:12px;padding:0;text-decoration:underline}
+  .sidebar .foot button:hover{color:#fff}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 28px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+  .topbar .title{font-size:16px;font-weight:700}
+  .topbar .title small{display:block;font-size:12px;color:var(--muted);font-weight:400}
+  .topbar .actions{display:flex;align-items:center;gap:10px}
+  .status{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .status .dot{width:8px;height:8px;border-radius:50%;background:#9ca3af}
+  .status.ok .dot{background:var(--green)}
+  .status.err .dot{background:var(--red)}
+
+  .content{padding:28px;max-width:960px;width:100%}
+  section{display:none}
+  section.active{display:block;animation:fade .18s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
+  .card h2{font-size:15px;font-weight:700;margin-bottom:4px}
+  .card .sub{font-size:12.5px;color:var(--muted);margin-bottom:18px}
+  .grid{display:grid;gap:16px}
+  .grid.cols-2{grid-template-columns:1fr 1fr}
+  .grid.cols-3{grid-template-columns:1fr 1fr 1fr}
+  @media(max-width:720px){.grid.cols-2,.grid.cols-3{grid-template-columns:1fr}}
+  .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
+  .field label .req{color:var(--red)}
+  .field input,.field textarea,.field select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;outline:none;background:#fff;transition:border .15s}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+  .field textarea{resize:vertical;min-height:80px}
+  .field .hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+  .field .prefix{position:relative}
+  .field .prefix span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:600}
+  .field .prefix input{padding-left:34px}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--text);font-size:13.5px;font-weight:600;transition:all .15s}
+  .btn:hover{border-color:#d1d5db;background:#f9fafb}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover{background:var(--accent-2);border-color:var(--accent-2)}
+  .btn.green{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.green:hover{filter:brightness(.95)}
+  .btn.danger{color:var(--red);border-color:#fecaca}
+  .btn.danger:hover{background:#fef2f2}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+  .btn.ghost:hover{background:#f3f4f6;color:var(--text)}
+  .btn.sm{padding:7px 11px;font-size:12.5px;border-radius:8px}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+
+  /* ---------- Mídia ---------- */
+  .dropzone{border:2px dashed #d1d5db;border-radius:var(--radius);padding:32px;text-align:center;color:var(--muted);cursor:pointer;transition:all .15s;background:#fafbfc}
+  .dropzone:hover,.dropzone.drag{border-color:var(--accent);background:#f5f3ff;color:var(--accent)}
+  .dropzone .big{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px}
+  .dropzone .small{font-size:12.5px}
+  .media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;margin-top:16px}
+  .media-item{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#f3f4f6}
+  .media-item img{width:100%;height:100%;object-fit:cover;display:block}
+  .media-item .rm{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:none;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center}
+  .media-item .rm:hover{background:var(--red)}
+  .media-item .tag{position:absolute;bottom:6px;left:6px;font-size:10px;background:rgba(0,0,0,.55);color:#fff;padding:2px 6px;border-radius:5px}
+
+  /* ---------- Avaliações ---------- */
+  .review-item{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px;background:#fafbfc}
+  .review-item .row{display:flex;gap:10px;align-items:flex-start}
+  .review-item .row .grow{flex:1}
+  .review-item .stars{display:flex;gap:2px;margin-bottom:8px}
+  .review-item .stars button{background:none;border:none;font-size:20px;color:#d1d5db;padding:0;line-height:1}
+  .review-item .stars button.on{color:#f59e0b}
+  .review-item .rm{background:none;border:none;color:var(--muted);font-size:18px;padding:2px 6px}
+  .review-item .rm:hover{color:var(--red)}
+
+  .list-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:#fff}
+  .list-row .grow{flex:1;min-width:0}
+  .list-row .grow .t{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .list-row .grow .s{font-size:11.5px;color:var(--muted)}
+
+  .toast{position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:12px 18px;border-radius:10px;font-size:13.5px;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:200;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none}
+  .toast.show{opacity:1;transform:none}
+  .toast.err{background:var(--red)}
+  .toast.ok{background:var(--green)}
+
+  .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="logo">GOKO<span>.</span></div>
+    <p>Painel de ofertas — acesso restrito.</p>
+    <label for="login-pass">Senha de acesso</label>
+    <input type="password" id="login-pass" placeholder="Digite a senha" autocomplete="current-password">
+    <div class="err" id="login-err"></div>
+    <button id="login-btn">Entrar</button>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app" class="hidden">
+  <aside class="sidebar">
+    <div class="brand">GOKO<span>.</span> Painel</div>
+    <nav id="nav">
+      <button data-sec="produto" class="active"><span class="ic">▣</span> Produto</button>
+      <button data-sec="midia"><span class="ic">▤</span> Mídia</button>
+      <button data-sec="cores"><span class="ic">◈</span> Cores</button>
+      <button data-sec="avaliacoes"><span class="ic">✎</span> Avaliações</button>
+      <button data-sec="conteudo"><span class="ic">✦</span> Conteúdo & IA</button>
+      <button data-sec="seo"><span class="ic">⌕</span> SEO</button>
+    </nav>
+    <div class="foot">
+      <button id="logout-btn">Sair</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="title" id="topbar-title">Produto</div>
+      <div class="actions">
+        <div class="status" id="save-status"><span class="dot"></span><span id="save-status-text">Sem alterações</span></div>
+        <button class="btn primary" id="btn-save">Salvar produto</button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ===== PRODUTO ===== -->
+      <section id="sec-produto" class="active">
+        <div class="card">
+          <h2>Informações do produto</h2>
+          <p class="sub">Nome e preços exibidos em todo o funil.</p>
+          <div class="grid">
+            <div class="field">
+              <label>Nome completo <span class="req">*</span></label>
+              <input id="f-nome" placeholder="Ex.: Escova Modeladora GOKOCO 3 em 1">
+            </div>
+            <div class="field">
+              <label>Nome curto</label>
+              <input id="f-nomeCurto" placeholder="Ex.: Escova GOKOCO">
+              <div class="hint">Usado em botões e títulos compactos.</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Preços</h2>
+          <p class="sub">Valores em reais (R$).</p>
+          <div class="grid cols-3">
+            <div class="field">
+              <label>Preço normal</label>
+              <div class="prefix"><span>R$</span><input id="f-preco" type="number" step="0.01" min="0"></div>
+            </div>
+            <div class="field">
+              <label>Preço antigo (riscado)</label>
+              <div class="prefix"><span>R$</span><input id="f-precoAntigo" type="number" step="0.01" min="0"></div>
+            </div>
+            <div class="field">
+              <label>Preço no PIX</label>
+              <div class="prefix"><span>R$</span><input id="f-precoPix" type="number" step="0.01" min="0"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== MÍDIA ===== -->
+      <section id="sec-midia">
+        <div class="card">
+          <h2>Imagens do produto</h2>
+          <p class="sub">Arraste e solte, ou clique para enviar. As imagens são salvas automaticamente na nuvem.</p>
+          <div class="dropzone" id="dropzone">
+            <div class="big">Arraste imagens aqui</div>
+            <div class="small">ou clique para selecionar (JPG, PNG, WebP)</div>
+          </div>
+          <input type="file" id="file-input" accept="image/*" multiple class="hidden">
+          <div class="media-grid" id="media-grid"></div>
+        </div>
+        <div class="card">
+          <h2>Vídeos</h2>
+          <p class="sub">Uma URL por linha (YouTube, TikTok, MP4 direto).</p>
+          <div class="field">
+            <textarea id="f-videos" placeholder="https://..."></textarea>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+            <input id="f-yt-termo" placeholder="Buscar vídeos no YouTube (termo)" style="flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:9px;outline:none">
+            <button class="btn" id="btn-yt-search">Buscar</button>
+          </div>
+          <div id="yt-results" style="margin-top:12px"></div>
+        </div>
+      </section>
+
+      <!-- ===== CORES ===== -->
+      <section id="sec-cores">
+        <div class="card">
+          <h2>Variações / cores</h2>
+          <p class="sub">Cada cor pode ter nome, preço e imagem próprios.</p>
+          <div id="cores-list"></div>
+          <button class="btn" id="btn-add-cor">+ Adicionar cor</button>
+        </div>
+      </section>
+
+      <!-- ===== AVALIAÇÕES ===== -->
+      <section id="sec-avaliacoes">
+        <div class="card">
+          <h2>Avaliações de clientes</h2>
+          <p class="sub">Comentários exibidos no feed da página de oferta.</p>
+          <div style="display:flex;gap:10px;margin-bottom:16px">
+            <button class="btn primary" id="btn-gerar-avaliacoes">Gerar com IA</button>
+            <button class="btn" id="btn-add-review">+ Adicionar manual</button>
+          </div>
+          <div id="reviews-list"></div>
+        </div>
+      </section>
+
+      <!-- ===== CONTEÚDO & IA ===== -->
+      <section id="sec-conteudo">
+        <div class="card">
+          <h2>Descrição de venda</h2>
+          <p class="sub">Texto persuasivo exibido na página.</p>
+          <div class="field">
+            <textarea id="f-descricao" style="min-height:110px"></textarea>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Benefícios</h2>
+          <p class="sub">Um por linha. Viram selos/bullets na página.</p>
+          <div class="field">
+            <textarea id="f-beneficios" style="min-height:110px" placeholder="Frete grátis&#10;Garantia de 30 dias&#10;..."></textarea>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Assistente de IA</h2>
+          <p class="sub">Gera descrição, benefícios e avaliações a partir do nome do produto.</p>
+          <button class="btn primary" id="btn-gerar-tudo">Gerar tudo com IA</button>
+          <div id="ia-status" style="margin-top:12px;font-size:13px;color:var(--muted)"></div>
+        </div>
+      </section>
+
+      <!-- ===== SEO ===== -->
+      <section id="sec-seo">
+        <div class="card">
+          <h2>SEO</h2>
+          <p class="sub">Título e descrição que aparecem no Google e nas redes.</p>
+          <div class="grid">
+            <div class="field">
+              <label>Título (title)</label>
+              <input id="f-meta-title">
+            </div>
+            <div class="field">
+              <label>Descrição (meta description)</label>
+              <textarea id="f-meta-description"></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var PASSWORD_KEY = 'goko_admin_pass';
+  var state = null; // produto completo
+
+  // ---------- Toast ----------
+  var toastTimer;
+  function toast(msg, type) {
+    var t = $('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + (type || '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.className = 'toast'; }, 2600);
+  }
+
+  function setStatus(text, cls) {
+    $('save-status-text').textContent = text;
+    $('save-status').className = 'status ' + (cls || '');
+  }
+
+  function getPass() { return sessionStorage.getItem(PASSWORD_KEY) || ''; }
+
+  // ---------- Login ----------
+  function tryLogin() {
+    var pass = $('login-pass').value.trim();
+    if (!pass) { $('login-err').textContent = 'Digite a senha.'; return; }
+    fetch('/api/admin/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-password': pass },
+      body: '{}'
+    }).then(function (r) {
+      if (r.status === 401) { $('login-err').textContent = 'Senha incorreta.'; return; }
+      sessionStorage.setItem(PASSWORD_KEY, pass);
+      $('login-screen').classList.add('hidden');
+      $('app').classList.remove('hidden');
+      loadProduct();
+    }).catch(function () {
+      $('login-err').textContent = 'Erro de conexão. Tente novamente.';
+    });
+  }
+  $('login-btn').addEventListener('click', tryLogin);
+  $('login-pass').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') tryLogin();
+  });
+  $('logout-btn').addEventListener('click', function () {
+    sessionStorage.removeItem(PASSWORD_KEY);
+    location.reload();
+  });
+
+  // ---------- Navegação ----------
+  var sections = ['produto','midia','cores','avaliacoes','conteudo','seo'];
+  var titles = { produto:'Produto', midia:'Mídia', cores:'Cores', avaliacoes:'Avaliações', conteudo:'Conteúdo & IA', seo:'SEO' };
+  $('nav').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-sec]');
+    if (!b) return;
+    var sec = b.getAttribute('data-sec');
+    sections.forEach(function (s) {
+      $('sec-' + s).classList.toggle('active', s === sec);
+    });
+    document.querySelectorAll('#nav button').forEach(function (n) {
+      n.classList.toggle('active', n.getAttribute('data-sec') === sec);
+    });
+    $('topbar-title').textContent = titles[sec];
+  });
+
+  // ---------- Carregar produto ----------
+  function loadProduct() {
+    fetch('/api/admin/product', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (data && data.nome) { state = data; }
+        else {
+          return fetch('product.json', { cache: 'no-store' }).then(function (r) { return r.json(); })
+            .then(function (d) { state = d; });
+        }
+      })
+      .then(function () { renderForm(); setStatus('Carregado', 'ok'); })
+      .catch(function () {
+        state = defaultProduct();
+        renderForm();
+        setStatus('Usando produto padrão', 'err');
+      });
+  }
+
+  function defaultProduct() {
+    return {
+      nome: '', nomeCurto: '', preco: 0, precoAntigo: 0, precoPix: 0,
+      cores: [], imagens: [], videos: [], avaliacoes: [], beneficios: [],
+      descricao: '', meta: { title: '', description: '' }
+    };
+  }
+
+  // ---------- Renderizar form ----------
+  function renderForm() {
+    $('f-nome').value = state.nome || '';
+    $('f-nomeCurto').value = state.nomeCurto || '';
+    $('f-preco').value = state.preco ?? '';
+    $('f-precoAntigo').value = state.precoAntigo ?? '';
+    $('f-precoPix').value = state.precoPix ?? '';
+    $('f-descricao').value = state.descricao || '';
+    $('f-beneficios').value = (state.beneficios || []).join('\n');
+    $('f-videos').value = (state.videos || []).join('\n');
+    $('f-meta-title').value = (state.meta && state.meta.title) || '';
+    $('f-meta-description').value = (state.meta && state.meta.description) || '';
+    renderMedia();
+    renderCores();
+    renderReviews();
+  }
+
+  // ---------- Ler form ----------
+  function readForm() {
+    state.nome = $('f-nome').value.trim();
+    state.nomeCurto = $('f-nomeCurto').value.trim();
+    state.preco = parseFloat($('f-preco').value) || 0;
+    state.precoAntigo = parseFloat($('f-precoAntigo').value) || 0;
+    state.precoPix = parseFloat($('f-precoPix').value) || 0;
+    state.descricao = $('f-descricao').value.trim();
+    state.beneficios = $('f-beneficios').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+    state.videos = $('f-videos').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+    state.meta = state.meta || {};
+    state.meta.title = $('f-meta-title').value.trim();
+    state.meta.description = $('f-meta-description').value.trim();
+  }
+
+  // ---------- Mídia ----------
+  function renderMedia() {
+    var grid = $('media-grid');
+    grid.innerHTML = '';
+    (state.imagens || []).forEach(function (url, i) {
+      var d = document.createElement('div');
+      d.className = 'media-item';
+      d.innerHTML = '<img src="' + esc(url) + '" alt="" loading="lazy">' +
+        '<button class="rm" data-i="' + i + '" title="Remover">×</button>' +
+        (i === 0 ? '<span class="tag">Principal</span>' : '');
+      grid.appendChild(d);
+    });
+  }
+  $('media-grid').addEventListener('click', function (e) {
+    var b = e.target.closest('.rm');
+    if (!b) return;
+    var i = parseInt(b.getAttribute('data-i'), 10);
+    state.imagens.splice(i, 1);
+    renderMedia();
+    markDirty();
+  });
+
+  var dz = $('dropzone');
+  dz.addEventListener('click', function () { $('file-input').click(); });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('drag'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('drag');
+    handleFiles(e.dataTransfer.files);
+  });
+  $('file-input').addEventListener('change', function (e) {
+    handleFiles(e.target.files);
+    e.target.value = '';
+  });
+
+  function handleFiles(files) {
+    Array.prototype.forEach.call(files, function (file) {
+      if (!file.type || file.type.indexOf('image/') !== 0) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        uploadImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function uploadImage(dataUrl) {
+    setStatus('Enviando imagem…', '');
+    fetch('/api/admin/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-password': getPass() },
+      body: JSON.stringify({ dataUrl: dataUrl })
+    }).then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.url) {
+          state.imagens = state.imagens || [];
+          state.imagens.push(d.url);
+          renderMedia();
+          markDirty();
+          setStatus('Imagem enviada', 'ok');
+        } else {
+          setStatus(d.message || 'Falha no upload', 'err');
+          toast(d.message || 'Falha no upload', 'err');
+        }
+      })
+      .catch(function () { setStatus('Falha no upload', 'err'); });
+  }
+
+  // ---------- Cores ----------
+  function renderCores() {
+    var list = $('cores-list');
+    list.innerHTML = '';
+    (state.cores || []).forEach(function (c, i) {
+      var d = document.createElement('div');
+      d.className = 'list-row';
+      d.innerHTML =
+        '<div class="grow"><div class="t">' + esc(c.nome || 'Cor ' + (i + 1)) + '</div>' +
+        '<div class="s">R$ ' + (c.preco ?? '') + (c.imagem ? ' · com imagem' : '') + '</div></div>' +
+        '<button class="btn sm" data-edit-cor="' + i + '">Editar</button>' +
+        '<button class="btn sm danger" data-del-cor="' + i + '">Remover</button>';
+      list.appendChild(d);
+    });
+  }
+  $('cores-list').addEventListener('click', function (e) {
+    var del = e.target.closest('[data-del-cor]');
+    if (del) {
+      state.cores.splice(parseInt(del.getAttribute('data-del-cor'), 10), 1);
+      renderCores(); markDirty(); return;
+    }
+    var edit = e.target.closest('[data-edit-cor]');
+    if (edit) {
+      var i = parseInt(edit.getAttribute('data-edit-cor'), 10);
+      editCor(i);
+    }
+  });
+  $('btn-add-cor').addEventListener('click', function () {
+    state.cores = state.cores || [];
+    state.cores.push({ nome: '', preco: 0, imagem: '' });
+    editCor(state.cores.length - 1);
+  });
+
+  function editCor(i) {
+    var c = state.cores[i];
+    var nome = prompt('Nome da cor:', c.nome || '');
+    if (nome === null) return;
+    var preco = prompt('Preço (R$):', c.preco ?? '');
+    if (preco === null) return;
+    var imagem = prompt('URL da imagem (opcional):', c.imagem || '');
+    if (imagem === null) return;
+    c.nome = nome.trim();
+    c.preco = parseFloat(preco) || 0;
+    c.imagem = imagem.trim();
+    renderCores(); markDirty();
+  }
+
+  // ---------- Avaliações ----------
+  function renderReviews() {
+    var list = $('reviews-list');
+    list.innerHTML = '';
+    (state.avaliacoes || []).forEach(function (r, i) {
+      var d = document.createElement('div');
+      d.className = 'review-item';
+      d.innerHTML =
+        '<div class="row">' +
+          '<div class="grow">' +
+            '<div class="stars">' + starsHtml(r.estrelas || 5, i) + '</div>' +
+            '<div class="field" style="margin-bottom:8px"><input data-rv="' + i + '" data-k="nome" value="' + esc(r.nome || '') + '" placeholder="Nome"></div>' +
+            '<div class="field"><textarea data-rv="' + i + '" data-k="texto" placeholder="Comentário">' + esc(r.texto || '') + '</textarea></div>' +
+          '</div>' +
+          '<button class="rm" data-del-review="' + i + '" title="Remover">×</button>' +
+        '</div>';
+      list.appendChild(d);
+    });
+  }
+  function starsHtml(n, i) {
+    var s = '';
+    for (var k = 1; k <= 5; k++) {
+      s += '<button data-star="' + i + '" data-v="' + k + '" class="' + (k <= n ? 'on' : '') + '">★</button>';
+    }
+    return s;
+  }
+  $('reviews-list').addEventListener('click', function (e) {
+    var del = e.target.closest('[data-del-review]');
+    if (del) {
+      state.avaliacoes.splice(parseInt(del.getAttribute('data-del-review'), 10), 1);
+      renderReviews(); markDirty(); return;
+    }
+    var star = e.target.closest('[data-star]');
+    if (star) {
+      var i = parseInt(star.getAttribute('data-star'), 10);
+      state.avaliacoes[i].estrelas = parseInt(star.getAttribute('data-v'), 10);
+      renderReviews(); markDirty();
+    }
+  });
+  $('reviews-list').addEventListener('input', function (e) {
+    var t = e.target;
+    if (!t.hasAttribute('data-rv')) return;
+    var i = parseInt(t.getAttribute('data-rv'), 10);
+    var k = t.getAttribute('data-k');
+    state.avaliacoes[i][k] = t.value;
+    markDirty();
+  });
+  $('btn-add-review').addEventListener('click', function () {
+    state.avaliacoes = state.avaliacoes || [];
+    state.avaliacoes.push({ nome: '', estrelas: 5, texto: '', fotos: [] });
+    renderReviews(); markDirty();
+  });
+
+  // ---------- IA ----------
+  function generate(tipo) {
+    readForm();
+    var nome = state.nome || state.nomeCurto;
+    if (!nome) { toast('Digite o nome do produto primeiro.', 'err'); return; }
+    var btn = tipo === 'tudo' ? $('btn-gerar-tudo') : $('btn-gerar-avaliacoes');
+    var original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Gerando…';
+    $('ia-status').textContent = 'Gerando conteúdo com IA…';
+    fetch('/api/admin/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-password': getPass() },
+      body: JSON.stringify({ nome: nome, tipo: tipo })
+    }).then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.descricao || d.beneficios || d.avaliacoes) {
+          if (d.descricao) { state.descricao = d.descricao; $('f-descricao').value = d.descricao; }
+          if (d.beneficios) { state.beneficios = d.beneficios; $('f-beneficios').value = d.beneficios.join('\n'); }
+          if (d.avaliacoes) {
+            state.avaliacoes = d.avaliacoes.map(function (r) {
+              return { nome: r.nome || '', estrelas: r.estrelas || 5, texto: r.texto || '', fotos: [] };
+            });
+            renderReviews();
+          }
+          markDirty();
+          $('ia-status').textContent = 'Conteúdo gerado com sucesso.';
+          toast('Conteúdo gerado com IA', 'ok');
+        } else {
+          $('ia-status').textContent = d.message || 'Falha ao gerar.';
+          toast(d.message || 'Falha ao gerar', 'err');
+        }
+      })
+      .catch(function () {
+        $('ia-status').textContent = 'Falha ao gerar conteúdo.';
+        toast('Falha ao gerar conteúdo', 'err');
+      })
+      .finally(function () { btn.disabled = false; btn.innerHTML = original; });
+  }
+  $('btn-gerar-tudo').addEventListener('click', function () { generate('tudo'); });
+  $('btn-gerar-avaliacoes').addEventListener('click', function () { generate('avaliacoes'); });
+
+  // ---------- YouTube ----------
+  $('btn-yt-search').addEventListener('click', function () {
+    readForm();
+    var termo = $('f-yt-termo').value.trim() || (state.nomeCurto || state.nome) + ' review';
+    var btn = $('btn-yt-search');
+    btn.disabled = true; btn.textContent = 'Buscando…';
+    $('yt-results').innerHTML = '<div class="sub">Buscando vídeos…</div>';
+    fetch('/api/public/youtube/search?q=' + encodeURIComponent(termo) + '&max=8')
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.items && d.items.length) {
+          $('yt-results').innerHTML = '';
+          d.items.forEach(function (v) {
+            var row = document.createElement('div');
+            row.className = 'list-row';
+            row.innerHTML =
+              '<img src="' + esc(v.thumb) + '" alt="" style="width:72px;height:42px;object-fit:cover;border-radius:6px">' +
+              '<div class="grow"><div class="t">' + esc(v.title) + '</div><div class="s">' + esc(v.channel) + '</div></div>' +
+              '<button class="btn sm green" data-use="' + esc(v.url) + '">Usar</button>';
+            $('yt-results').appendChild(row);
+          });
+        } else {
+          $('yt-results').innerHTML = '<div class="sub">' + esc(d.message || 'Nenhum vídeo encontrado.') + '</div>';
+        }
+      })
+      .catch(function () { $('yt-results').innerHTML = '<div class="sub">Falha na busca.</div>'; })
+      .finally(function () { btn.disabled = false; btn.textContent = 'Buscar'; });
+  });
+  $('yt-results').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-use]');
+    if (!b) return;
+    var url = b.getAttribute('data-use');
+    readForm();
+    if (state.videos.indexOf(url) === -1) state.videos.push(url);
+    $('f-videos').value = state.videos.join('\n');
+    markDirty();
+    toast('Vídeo adicionado', 'ok');
+  });
+
+  // ---------- Salvar ----------
+  var dirty = false;
+  function markDirty() { dirty = true; setStatus('Alterações não salvas', ''); }
+  ['f-nome','f-nomeCurto','f-preco','f-precoAntigo','f-precoPix','f-descricao','f-beneficios','f-videos','f-meta-title','f-meta-description'].forEach(function (id) {
+    $(id).addEventListener('input', markDirty);
+  });
+
+  $('btn-save').addEventListener('click', function () {
+    readForm();
+    if (!state.nome) { toast('O nome do produto é obrigatório.', 'err'); return; }
+    var btn = $('btn-save');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Salvando…';
+    setStatus('Salvando…', '');
+    fetch('/api/admin/product', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-password': getPass() },
+      body: JSON.stringify(state)
+    }).then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.ok) {
+          dirty = false;
+          setStatus('Salvo', 'ok');
+          toast('Produto salvo com sucesso', 'ok');
+        } else {
+          setStatus(d.message || 'Falha ao salvar', 'err');
+          toast(d.message || 'Falha ao salvar', 'err');
+        }
+      })
+      .catch(function () { setStatus('Falha ao salvar', 'err'); toast('Falha ao salvar', 'err'); })
+      .finally(function () { btn.disabled = false; btn.innerHTML = 'Salvar produto'; });
+  });
+
+  // ---------- Util ----------
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+
+  // Auto-login se já autenticado
+  if (getPass()) {
+    $('login-screen').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    loadProduct();
+  }
+})();
+</script>
+</body>
+</html>

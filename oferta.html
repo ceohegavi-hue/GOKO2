@@ -207,7 +207,7 @@ footer img{width:34px;height:34px;object-fit:contain;margin:8px 0}
       tName=document.getElementById('lv-typing-name');
   if(!feed) return;
    var VERIFIED='/__l5e/assets-v1/22f43764-734c-44fa-a53f-34f7b1082f86/tiktok-shop-back-verified.webp';
-  var MSGS=[
+  var FALLBACK=[
     {n:'Isabela N.',av:'/images/perfis/pf-dog.webp',s:5,t:'chegou hj, testei no meu ondulado e em 10 min ficou liso com a ponta virada. amei',ph:['/images/f2/reviews/rev-1.webp']},
     {n:'Camila S.',av:'/images/perfis/p16.webp',s:5,t:'veio numa caixa preta bem firme, com manual e a luvinha. nada amassado',ph:['/images/f2/reviews/rev-2.webp','/images/f2/reviews/rev-3.webp']},
     {n:'Fernanda M.',av:'/images/perfis/pf-porsol.webp',s:5,t:'silenciosa, nao faz barulho de secador. uso de manha antes do trabalho',ph:['/images/f2/reviews/rev-5.webp']},
@@ -219,6 +219,8 @@ footer img{width:34px;height:34px;object-fit:contain;margin:8px 0}
     {n:'Mariana F.',av:'/images/perfis/p15.webp',s:5,t:'leve, seguro com uma mao só sem cansar o braço',ph:['/images/f2/reviews/rev-10.webp']},
     {n:'Renata G.',av:'/images/perfis/p1.webp',s:5,t:'chegou em 7 dias aqui em Fortaleza, veio certinho',ph:['/images/f2/reviews/rev-4.webp']}
   ];
+  function mapReviews(list){ return (list||[]).map(function(r){ return {n:r.nome||r.n, av:r.avatar||r.av, s:r.estrelas||r.s||5, t:r.texto||r.t, ph:r.fotos||r.ph}; }); }
+  var MSGS = (window.PRODUCT && window.PRODUCT.avaliacoes && window.PRODUCT.avaliacoes.length) ? mapReviews(window.PRODUCT.avaliacoes) : FALLBACK;
   function stars(n){ var s=''; for(var i=0;i<5;i++) s+= i<n?'★':'☆'; return s; }
   var MAX=6, i=0;
   var AGO=['agora mesmo','há 1 minuto','há 2 minutos','há 3 minutos','há 4 minutos'];
@@ -286,9 +288,17 @@ footer img{width:34px;height:34px;object-fit:contain;margin:8px 0}
       });
     }, 1400+Math.random()*1100);
   }
+  document.addEventListener('product:reviews', function(e){
+    MSGS = mapReviews(e.detail);
+    if(!MSGS.length) MSGS = FALLBACK;
+    i = 0;
+    feed.innerHTML = '';
+    instant(MSGS[i++]); instant(MSGS[i++]);
+  });
   setTimeout(loop, 1800);
 })();
 </script>
 <script src="js/utm.js"></script><script src="js/resume-upsell.js" defer=""></script><script src="js/back-redirect.js"></script>
+<script src="js/product-loader.js"></script>
 
 </body></html>
