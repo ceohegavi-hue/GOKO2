@@ -88,17 +88,26 @@
   }
 
   function load() {
-    fetch(CONFIG_URL, { cache: 'no-store' })
+    // 1) Tenta o produto salvo no Blob (via painel admin).
+    // 2) Se não existir, usa o product.json estático do repositório.
+    fetch('/api/admin/product', { cache: 'no-store' })
       .then(function (r) {
-        if (!r.ok) throw new Error('product.json não encontrado (' + r.status + ')');
+        if (!r.ok) throw new Error('blob');
         return r.json();
       })
       .then(apply)
-      .catch(function (err) {
-        // Fallback silencioso: a página mantém os valores hardcoded.
-        if (window.console && console.warn) {
-          console.warn('[product-loader]', err.message);
-        }
+      .catch(function () {
+        fetch(CONFIG_URL, { cache: 'no-store' })
+          .then(function (r) {
+            if (!r.ok) throw new Error('product.json não encontrado (' + r.status + ')');
+            return r.json();
+          })
+          .then(apply)
+          .catch(function (err) {
+            if (window.console && console.warn) {
+              console.warn('[product-loader]', err.message);
+            }
+          });
       });
   }
 

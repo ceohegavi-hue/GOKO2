@@ -9,5 +9,9 @@
   },
   "devDependencies": {
     "serve": "^14.2.4"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.2",
+    "ai": "^7.0.143"
   }
 }
