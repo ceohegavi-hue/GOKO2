@@ -55,6 +55,12 @@
   .search-links a{text-decoration:none}
   .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
   .kbd{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:11px}
+  .yt-item{display:flex;gap:12px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .yt-thumb{width:120px;height:68px;object-fit:cover;border-radius:8px;background:#000;flex-shrink:0}
+  .yt-meta{flex:1;min-width:0}
+  .yt-title{font-weight:700;font-size:13px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .yt-channel{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .yt-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -153,6 +159,17 @@
     <div class="divider"></div>
     <label>Termos de busca sugeridos (gerados do nome)</label>
     <div class="list" id="search-terms"></div>
+  </div>
+
+  <!-- YouTube Data API -->
+  <div class="card">
+    <h2>Buscar vídeos no YouTube (automático)</h2>
+    <p class="sub">Busca vídeos de review reais via YouTube Data API e adiciona direto na lista de vídeos.</p>
+    <div class="row">
+      <input id="f-yt-termo" placeholder="Termo de busca (padrão: nome do produto + review)" style="flex:1">
+      <button class="btn primary" id="btn-yt-search">Buscar vídeos</button>
+    </div>
+    <div class="list" id="yt-results" style="margin-top:12px"></div>
   </div>
 
   <!-- SEO -->
@@ -408,6 +425,58 @@
       readForm();
       renderSearch();
     });
+  });
+
+  // ---- Busca YouTube (Data API) ----
+  function renderYtResults(items) {
+    var list = $('yt-results');
+    list.innerHTML = '';
+    if (!items || !items.length) {
+      list.innerHTML = '<span class="hint">Nenhum vídeo encontrado.</span>';
+      return;
+    }
+    items.forEach(function (v) {
+      var d = document.createElement('div');
+      d.className = 'yt-item';
+      d.innerHTML =
+        '<img class="yt-thumb" src="' + esc(v.thumb) + '" alt="" loading="lazy">' +
+        '<div class="yt-meta">' +
+          '<div class="yt-title">' + esc(v.title) + '</div>' +
+          '<div class="yt-channel">' + esc(v.channel) + '</div>' +
+        '</div>' +
+        '<div class="yt-actions">' +
+          '<button class="btn green sm" data-use="' + esc(v.url) + '">Usar vídeo</button>' +
+          '<a class="btn ghost sm" href="' + esc(v.url) + '" target="_blank" rel="noopener">Abrir ↗</a>' +
+        '</div>';
+      list.appendChild(d);
+    });
+  }
+
+  $('yt-results').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-use]');
+    if (!b) return;
+    var url = b.getAttribute('data-use');
+    readForm();
+    if (state.videos.indexOf(url) === -1) state.videos.push(url);
+    $('f-videos').value = state.videos.join('\n');
+    toast('Vídeo adicionado à lista');
+  });
+
+  $('btn-yt-search').addEventListener('click', function () {
+    readForm();
+    var termo = $('f-yt-termo').value.trim() || (state.nomeCurto || state.nome) + ' review';
+    var btn = $('btn-yt-search');
+    btn.disabled = true;
+    btn.textContent = 'Buscando…';
+    $('yt-results').innerHTML = '<span class="hint">Buscando vídeos no YouTube…</span>';
+    fetch('/api/public/youtube/search?q=' + encodeURIComponent(termo) + '&max=10')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.items) renderYtResults(data.items);
+        else { $('yt-results').innerHTML = '<span class="hint">' + esc(data.message || 'Erro na busca.') + '</span>'; }
+      })
+      .catch(function () { $('yt-results').innerHTML = '<span class="hint">Falha ao buscar vídeos.</span>'; })
+      .finally(function () { btn.disabled = false; btn.textContent = 'Buscar vídeos'; });
   });
 
   // ---- Salvar / Carregar ----
