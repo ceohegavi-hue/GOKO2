@@ -104,11 +104,11 @@ footer img{width:34px;height:34px;object-fit:contain;margin:8px 0}
   <div class="card">
     <div class="tagline"><span class="off" id="lv-off">-29% OFF</span><span class="flash">OFERTA RELÂMPAGO</span></div>
     <div class="prod">
-      <img id="lv-img" src="images/potes-1.webp" alt="Escova Modeladora GOKOCO">
+      <img id="lv-img" src="images/potes-1.webp" alt="Kit Anti-Aging 30+ Rotina Completa">
       <div>
-        <h3 id="lv-nome">Escova Modeladora GOKOCO</h3>
+        <h3 id="lv-nome">Kit Anti-Aging 30+ Rotina Completa</h3>
         <div class="stars">★★★★★ <small>4.6 (722)</small></div>
-        <div class="prices"><span class="old" id="lv-old">R$ 30,00</span><span class="new" id="lv-new">R$ 26,90</span></div>
+        <div class="prices"><span class="old" id="lv-old">R$ 33,90</span><span class="new" id="lv-new">R$ 29,90</span></div>
         <div class="pix">à vista no Pix</div>
       </div>
     </div>
@@ -147,8 +147,8 @@ footer img{width:34px;height:34px;object-fit:contain;margin:8px 0}
   function fmt(n){ return 'R$ '+Number(n||0).toFixed(2).replace('.',','); }
   function r2(n){ return Number(Number(n||0).toFixed(2)); }
 
-  var PROMO=26.90;
-  var old=30.00;
+  var PROMO=29.90;
+  var old=33.90;
   try{
     var pu=parseFloat(localStorage.getItem('precoUnit')||'');
     if(pu&&!isNaN(pu)&&pu>PROMO) old=r2(pu);
@@ -182,7 +182,7 @@ footer img{width:34px;height:34px;object-fit:contain;margin:8px 0}
 
   document.getElementById('lv-cta').addEventListener('click', function(){
     try{ sessionStorage.setItem('lv_downsell_done','1'); }catch(e){}
-    try{ if(window.lvTrackInitiateCheckout) window.lvTrackInitiateCheckout(MODO==='metade'?0:34.90); }catch(e){}
+    try{ if(window.lvTrackInitiateCheckout) window.lvTrackInitiateCheckout(MODO==='metade'?0:33.90); }catch(e){}
     if(MODO==='metade'){
       /* Mantém o pedido inteiro (kits, ofertas e frete) e aplica 50% OFF em tudo no checkout. */
       try{ sessionStorage.setItem('lv_disc','0.5'); }catch(e){}
@@ -191,7 +191,7 @@ footer img{width:34px;height:34px;object-fit:contain;margin:8px 0}
     }
     try{
       sessionStorage.removeItem('lv_disc');
-      localStorage.setItem('precoUnit','34.90');
+      localStorage.setItem('precoUnit','33.90');
       localStorage.setItem('qtdSelecionada','1');
       localStorage.removeItem('pedidoResumo');
     }catch(e){}
@@ -208,15 +208,15 @@ footer img{width:34px;height:34px;object-fit:contain;margin:8px 0}
   if(!feed) return;
    var VERIFIED='/__l5e/assets-v1/22f43764-734c-44fa-a53f-34f7b1082f86/tiktok-shop-back-verified.webp';
   var MSGS=[
-    {n:'Isabela N.',av:'/images/perfis/pf-dog.webp',s:5,t:'chegou hj, testei no meu ondulado e em 10 min ficou liso com a ponta virada. amei',ph:['/images/f2/reviews/rev-1.webp']},
-    {n:'Camila S.',av:'/images/perfis/p16.webp',s:5,t:'veio numa caixa preta bem firme, com manual e a luvinha. nada amassado',ph:['/images/f2/reviews/rev-2.webp','/images/f2/reviews/rev-3.webp']},
-    {n:'Fernanda M.',av:'/images/perfis/pf-porsol.webp',s:5,t:'silenciosa, nao faz barulho de secador. uso de manha antes do trabalho',ph:['/images/f2/reviews/rev-5.webp']},
-    {n:'Juliana R.',av:'/images/perfis/pf-cachoeira.webp',s:5,t:'meu cabelo é tingido e eu tava com medo, mas no 5 ja modela e nao resseca',ph:['/images/f2/reviews/rev-6.webp']},
-    {n:'Patrícia L.',av:'/images/perfis/p8.webp',s:5,t:'aquece rapido demais, mal separei o cabelo e ja tava quente',ph:['/images/f2/reviews/rev-7.webp']},
-    {n:'Ana Clara D.',av:'/images/perfis/p7.webp',s:5,t:'cabo gira de verdade, nao enrola no braço. so isso ja valeu 😍',ph:['/images/f2/reviews/rev-8.webp']},
-    {n:'Beatriz C.',av:'/images/perfis/pf-paisagem.webp',s:5,t:'a cerda nao puxa o fio, e a tela mostra a temperatura. uso sempre no 4',ph:['/images/f2/reviews/rev-9.webp']},
+    {n:'Isabela N.',av:'/images/perfis/pf-dog.webp',s:5,t:'chegou hj, testei na minha pele e em poucos dias ja senti mais firmeza. amei',ph:['/images/f2/reviews/rev-1.webp']},
+    {n:'Camila S.',av:'/images/perfis/p16.webp',s:5,t:'veio numa caixa bem firme, com manual e tudo certinho. nada amassado',ph:['/images/f2/reviews/rev-2.webp','/images/f2/reviews/rev-3.webp']},
+    {n:'Fernanda M.',av:'/images/perfis/pf-porsol.webp',s:5,t:'textura leve, absorve rapido. uso de manha antes do trabalho',ph:['/images/f2/reviews/rev-5.webp']},
+    {n:'Juliana R.',av:'/images/perfis/pf-cachoeira.webp',s:5,t:'minha pele é sensivel e eu tava com medo, mas nao irritou e ja deu viço',ph:['/images/f2/reviews/rev-6.webp']},
+    {n:'Patrícia L.',av:'/images/perfis/p8.webp',s:5,t:'hidrata demais, mal apliquei e ja senti a pele macia',ph:['/images/f2/reviews/rev-7.webp']},
+    {n:'Ana Clara D.',av:'/images/perfis/p7.webp',s:5,t:'o cheiro é maravilhoso e nao fica oleoso. so isso ja valeu 😍',ph:['/images/f2/reviews/rev-8.webp']},
+    {n:'Beatriz C.',av:'/images/perfis/pf-paisagem.webp',s:5,t:'o serum nao deixa a pele grudenta, e o creme rende bastante. uso sempre',ph:['/images/f2/reviews/rev-9.webp']},
     {n:'Larissa T.',av:'/images/perfis/pf-gato.webp',s:5,t:'boa, gostei. cumpre o que promete'},
-    {n:'Mariana F.',av:'/images/perfis/p15.webp',s:5,t:'leve, seguro com uma mao só sem cansar o braço',ph:['/images/f2/reviews/rev-10.webp']},
+    {n:'Mariana F.',av:'/images/perfis/p15.webp',s:5,t:'leve, espalha facil sem deixar a pele pesada',ph:['/images/f2/reviews/rev-10.webp']},
     {n:'Renata G.',av:'/images/perfis/p1.webp',s:5,t:'chegou em 7 dias aqui em Fortaleza, veio certinho',ph:['/images/f2/reviews/rev-4.webp']}
   ];
   function stars(n){ var s=''; for(var i=0;i<5;i++) s+= i<n?'★':'☆'; return s; }
